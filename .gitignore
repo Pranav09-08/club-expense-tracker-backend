@@ -1,0 +1,44 @@
+# ========================
+# Node
+# ========================
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+
+# ========================
+# Environment Variables
+# ========================
+.env
+.env.local
+.env.*.local
+
+# ========================
+# Logs
+# ========================
+logs
+*.log
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# ========================
+# OS Files
+# ========================
+.DS_Store
+Thumbs.db
+
+# ========================
+# IDE / Editor
+# ========================
+.vscode/
+.idea/
+*.swp
+
+# ========================
+# Build
+# ========================
+dist/
+build/
