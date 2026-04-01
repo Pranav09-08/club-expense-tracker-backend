@@ -3,6 +3,9 @@ import cors from "cors";
 import dotenv from "dotenv";
 import db from "./config/db.js";
 import authRoutes from "./routes/authRoute.js";
+import adminRoutes from "./routes/admin/adminRoute.js";
+import coordinatorRoutes from "./routes/coordinator/coordinatorRoute.js";
+import studentLeadRoutes from "./routes/studentLead/studentLeadRoute.js";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -14,6 +17,9 @@ const PORT = process.env.PORT || 5001;
 app.use(cors());
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/coordinator", coordinatorRoutes);
+app.use("/api/student-lead", studentLeadRoutes);
 
 // Health check route
 app.get("/", (req, res) => {
