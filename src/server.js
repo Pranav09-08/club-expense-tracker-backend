@@ -16,7 +16,7 @@ app.use(express.json());
 // Health check route
 app.get("/", (req, res) => {
   res.status(200).json({
-    message: "Carbon Credit Backend is running 🚀",
+    message: "Club Expense Backend is running 🚀",
     status: "OK",
   });
 });
