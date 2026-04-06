@@ -1,20 +1,20 @@
-# Club Expense Tracker - API Documentation
+# Club Expense Tracker API Documentation
 
 ## Base URL
-```
-http://localhost:5001/api
-```
+`http://localhost:5001/api`
+
+## Auth Header
+For protected routes:
+`Authorization: Bearer <accessToken>`
 
 ---
 
-## 🔐 Authentication APIs
+## Authentication APIs
 
-### 1. Login
-**Endpoint:** `POST /auth/login`
+### Login
+`POST /auth/login`
 
-**Description:** User login with email and password. Returns access token and user details.
-
-**Request Body:**
+Request body:
 ```json
 {
   "email": "admin@club.in",
@@ -24,14 +24,12 @@ http://localhost:5001/api
 }
 ```
 
-**Request Body Notes:**
-- `email` (required): User's email
-- `password` (required): User's password
-- `roleCode` (optional): Specific role to activate (e.g., "ADMIN", "COORDINATOR", "STUDENT_LEAD", "FINANCE_LEAD", "MEMBER")
-- `clubId` (optional): Club ID for club-scoped roles (only for COORDINATOR, STUDENT_LEAD, FINANCE_LEAD, MEMBER)
-- If `roleCode` or `clubId` not provided, first assigned role is activated
+Notes:
+- `roleCode` is optional.
+- `clubId` is required only for club-scoped roles.
+- If not provided, the first assigned role is used.
 
-**Response (200 OK):**
+Response:
 ```json
 {
   "message": "Login successful",
@@ -50,38 +48,16 @@ http://localhost:5001/api
       "roleCode": "ADMIN",
       "scopeType": "GLOBAL",
       "clubId": null
-    },
-    {
-      "roleCode": "COORDINATOR",
-      "scopeType": "CLUB",
-      "clubId": 1
     }
   ],
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+  "accessToken": "<jwt-token>"
 }
 ```
 
-**Error Responses:**
-- `400 Bad Request`: Missing email or password
-- `401 Unauthorized`: Invalid credentials
-- `403 Forbidden`: Account is inactive/locked
-- `403 Forbidden`: Requested role not assigned to user
+### Current User
+`GET /auth/me`
 
----
-
-### 2. Get Current User
-**Endpoint:** `GET /auth/me`
-
-**Description:** Fetch current logged-in user details and roles.
-
-**Headers:**
-```
-Authorization: Bearer <accessToken>
-```
-
-**Request Body:** None
-
-**Response (200 OK):**
+Response:
 ```json
 {
   "user": {
@@ -95,11 +71,6 @@ Authorization: Bearer <accessToken>
       "roleCode": "ADMIN",
       "scopeType": "GLOBAL",
       "clubId": null
-    },
-    {
-      "roleCode": "COORDINATOR",
-      "scopeType": "CLUB",
-      "clubId": 1
     }
   ],
   "tokenContext": {
@@ -110,59 +81,33 @@ Authorization: Bearer <accessToken>
 }
 ```
 
-**Error Responses:**
-- `401 Unauthorized`: Invalid or expired token
-- `404 Not Found`: User not found
+### Logout
+`POST /auth/logout`
 
----
-
-### 3. Logout
-**Endpoint:** `POST /auth/logout`
-
-**Description:** Logout current user by invalidating access token.
-
-**Headers:**
-```
-Authorization: Bearer <accessToken>
-```
-
-**Request Body:** None
-
-**Response (200 OK):**
+Response:
 ```json
 {
   "message": "Logout successful"
 }
 ```
 
-**Error Responses:**
-- `400 Bad Request`: No active session token found
-- `401 Unauthorized`: Invalid or expired token
-
 ---
 
-## 👨‍💼 Admin APIs
+## Admin APIs
 
-### 1. Create Club
-**Endpoint:** `POST /admin/clubs`
+### Create Club
+`POST /admin/clubs`
 
-**Description:** Admin creates a new club.
-
-**Headers:**
-```
-Authorization: Bearer <adminAccessToken>
-```
-
-**Request Body:**
+Request body:
 ```json
 {
   "clubCode": "tech_club",
   "clubName": "Tech Club",
-  "description": "Handles all technical events and workshops"
+  "description": "Handles technical events"
 }
 ```
 
-**Response (201 Created):**
+Response:
 ```json
 {
   "message": "Club created successfully",
@@ -174,26 +119,10 @@ Authorization: Bearer <adminAccessToken>
 }
 ```
 
-**Error Responses:**
-- `400 Bad Request`: Missing required fields (clubCode, clubName)
-- `403 Forbidden`: Only admin can create clubs
-- `409 Conflict`: Club code already exists
+### List Clubs
+`GET /admin/clubs`
 
----
-
-### 2. List All Clubs
-**Endpoint:** `GET /admin/clubs`
-
-**Description:** Admin lists all clubs.
-
-**Headers:**
-```
-Authorization: Bearer <adminAccessToken>
-```
-
-**Request Body:** None
-
-**Response (200 OK):**
+Response:
 ```json
 {
   "message": "Clubs fetched successfully",
@@ -202,39 +131,18 @@ Authorization: Bearer <adminAccessToken>
       "id": 1,
       "club_code": "TECH_CLUB",
       "club_name": "Tech Club",
-      "description": "Handles all technical events",
+      "description": "Handles technical events",
       "is_active": true,
       "created_at": "2026-04-01T10:30:00.000Z"
-    },
-    {
-      "id": 2,
-      "club_code": "SPORTS_CLUB",
-      "club_name": "Sports Club",
-      "description": "Manages sports activities",
-      "is_active": true,
-      "created_at": "2026-04-01T11:00:00.000Z"
     }
   ]
 }
 ```
 
-**Error Responses:**
-- `403 Forbidden`: Only admin can list clubs
-- `401 Unauthorized`: Invalid token
+### Create Coordinator
+`POST /admin/coordinators`
 
----
-
-### 3. Create Coordinator
-**Endpoint:** `POST /admin/coordinators`
-
-**Description:** Admin creates a coordinator for a specific club.
-
-**Headers:**
-```
-Authorization: Bearer <adminAccessToken>
-```
-
-**Request Body:**
+Request body:
 ```json
 {
   "fullName": "Ravi Kumar",
@@ -244,7 +152,7 @@ Authorization: Bearer <adminAccessToken>
 }
 ```
 
-**Response (201 Created):**
+Response:
 ```json
 {
   "message": "Coordinator created successfully",
@@ -260,29 +168,10 @@ Authorization: Bearer <adminAccessToken>
 }
 ```
 
-**Error Responses:**
-- `400 Bad Request`: Missing required fields
-- `403 Forbidden`: Only admin can create coordinator
-- `409 Conflict`: Email already exists
+### List Coordinators in Club
+`GET /admin/clubs/:clubId/coordinators`
 
----
-
-### 4. List Coordinators in Club
-**Endpoint:** `GET /admin/clubs/:clubId/coordinators`
-
-**Description:** Admin lists all coordinators for a specific club.
-
-**Headers:**
-```
-Authorization: Bearer <adminAccessToken>
-```
-
-**URL Parameters:**
-- `clubId` (required): Club ID
-
-**Request Body:** None
-
-**Response (200 OK):**
+Response:
 ```json
 {
   "message": "Coordinators fetched successfully",
@@ -297,28 +186,14 @@ Authorization: Bearer <adminAccessToken>
 }
 ```
 
-**Error Responses:**
-- `403 Forbidden`: Only admin can list coordinators
-- `401 Unauthorized`: Invalid token
-
 ---
 
-## 👥 Coordinator APIs
+## Coordinator APIs
 
-### 1. Create Lead (Finance Lead or Student Lead)
-**Endpoint:** `POST /coordinator/leads`
+### Create Lead
+`POST /coordinator/leads`
 
-**Description:** Coordinator creates a finance lead or student lead for their club.
-
-**Headers:**
-```
-Authorization: Bearer <coordinatorAccessToken>
-Content-Type: application/json
-```
-
-**Note:** The coordinatorAccessToken must have `activeClubId` set in its payload (login with roleCode and clubId for coordinator).
-
-**Request Body:**
+Request body:
 ```json
 {
   "fullName": "Anita Sharma",
@@ -328,13 +203,11 @@ Content-Type: application/json
 }
 ```
 
-**Request Body Notes:**
-- `fullName` (required): Lead's full name
-- `email` (required): Lead's email
-- `password` (required): Lead's password
-- `roleCode` (required): Either "FINANCE_LEAD" or "STUDENT_LEAD"
+Allowed `roleCode` values:
+- `FINANCE_LEAD`
+- `STUDENT_LEAD`
 
-**Response (201 Created):**
+Response:
 ```json
 {
   "message": "Lead created successfully",
@@ -350,27 +223,10 @@ Content-Type: application/json
 }
 ```
 
-**Error Responses:**
-- `400 Bad Request`: Missing required fields or invalid roleCode
-- `400 Bad Request`: Coordinator token must include active club
-- `403 Forbidden`: Only coordinator can create leads
-- `409 Conflict`: Email already exists
+### List Leads in Club
+`GET /coordinator/leads`
 
----
-
-### 2. List Leads in Club
-**Endpoint:** `GET /coordinator/leads`
-
-**Description:** Coordinator lists all leads (finance lead & student lead) in their club.
-
-**Headers:**
-```
-Authorization: Bearer <coordinatorAccessToken>
-```
-
-**Request Body:** None
-
-**Response (200 OK):**
+Response:
 ```json
 {
   "message": "Leads fetched successfully",
@@ -381,220 +237,246 @@ Authorization: Bearer <coordinatorAccessToken>
       "email": "anita.lead@club.in",
       "role_code": "STUDENT_LEAD",
       "joined_at": "2026-04-01T11:15:00.000Z"
-    },
-    {
-      "id": 5,
-      "full_name": "Priya Patel",
-      "email": "priya.finance@club.in",
-      "role_code": "FINANCE_LEAD",
-      "joined_at": "2026-04-01T11:20:00.000Z"
     }
   ]
 }
 ```
 
-**Error Responses:**
-- `400 Bad Request`: Coordinator token must include active club
-- `403 Forbidden`: Only coordinator can view leads
-- `401 Unauthorized`: Invalid token
-
 ---
 
-## 👨‍🎓 Student Lead APIs
+## Member APIs
 
-### 1. Create Member
-**Endpoint:** `POST /student-lead/members`
+### Create Expense
+`POST /member/expenses`
 
-**Description:** Student lead creates a member for their club.
-
-**Headers:**
-```
-Authorization: Bearer <studentLeadAccessToken>
-Content-Type: application/json
-```
-
-**Note:** The studentLeadAccessToken must have `activeClubId` set in its payload.
-
-**Request Body:**
+Request body:
 ```json
 {
-  "fullName": "Vikram Singh",
-  "email": "vikram.member@club.in",
-  "password": "MemberPass@123"
+  "title": "Printing for workshop",
+  "description": "Printed 100 handouts for the event",
+  "expenseDate": "2026-04-01",
+  "categoryCode": "OTHER",
+  "amount": 500,
+  "lineItems": [
+    {
+      "itemName": "A4 printouts",
+      "quantity": 100,
+      "unitPrice": 5,
+      "totalPrice": 500,
+      "note": "Black and white"
+    }
+  ]
 }
 ```
 
-**Response (201 Created):**
+Response:
 ```json
 {
-  "message": "Member created successfully",
-  "user": {
-    "id": 6,
-    "full_name": "Vikram Singh",
-    "email": "vikram.member@club.in"
-  },
-  "assignedRole": {
-    "roleCode": "MEMBER",
-    "clubId": 1
+  "message": "Expense created successfully",
+  "expense": {
+    "id": 12,
+    "clubId": 1,
+    "title": "Printing for workshop",
+    "status": "SUBMITTED"
   }
 }
 ```
 
-**Error Responses:**
-- `400 Bad Request`: Missing required fields
-- `400 Bad Request`: Student lead token must include active club
-- `403 Forbidden`: Only student lead can create members
-- `409 Conflict`: Email already exists
+### List My Expenses
+`GET /member/expenses`
 
----
-
-### 2. List Members in Club
-**Endpoint:** `GET /student-lead/members`
-
-**Description:** Student lead lists all members in their club.
-
-**Headers:**
-```
-Authorization: Bearer <studentLeadAccessToken>
-```
-
-**Request Body:** None
-
-**Response (200 OK):**
+Response:
 ```json
 {
-  "message": "Members fetched successfully",
-  "members": [
+  "message": "Expenses fetched successfully",
+  "expenses": [
     {
-      "id": 6,
-      "full_name": "Vikram Singh",
-      "email": "vikram.member@club.in",
-      "joined_at": "2026-04-01T11:45:00.000Z"
-    },
-    {
-      "id": 7,
-      "full_name": "Neha Gupta",
-      "email": "neha.member@club.in",
-      "joined_at": "2026-04-01T12:00:00.000Z"
+      "id": 12,
+      "title": "Printing for workshop",
+      "description": "Printed 100 handouts for the event",
+      "expense_date": "2026-04-01",
+      "amount": "500.00",
+      "currency": "INR",
+      "status": "SUBMITTED",
+      "submitted_at": "2026-04-01T10:00:00.000Z",
+      "approved_at": null,
+      "rejected_at": null,
+      "rejection_reason": null,
+      "category_code": "OTHER",
+      "category_name": "Other"
     }
   ]
 }
 ```
 
-**Error Responses:**
-- `400 Bad Request`: Student lead token must include active club
-- `403 Forbidden`: Only student lead can view members
-- `401 Unauthorized`: Invalid token
+### Create Stationery Request
+`POST /member/stationery-requests`
 
----
-
-## 📋 Complete Flow Example
-
-### Step 1: Admin Login
-```bash
-POST /auth/login
+Request body:
+```json
 {
-  "email": "admin@club.in",
-  "password": "AdminPassword123"
+  "requestTitle": "Stationery for workshop",
+  "requestReason": "Need pens and notebooks for attendees",
+  "requiredByDate": "2026-04-05",
+  "items": [
+    {
+      "itemName": "Notebook",
+      "quantity": 20,
+      "estimatedUnitPrice": 30,
+      "estimatedTotalPrice": 600,
+      "note": "A5 size"
+    }
+  ]
 }
 ```
-**Response:** Admin access token with ADMIN role
 
-### Step 2: Admin Creates Club
-```bash
-POST /admin/clubs
-Headers: Authorization: Bearer <admin-token>
+Response:
+```json
 {
-  "clubCode": "tech_club",
-  "clubName": "Tech Club",
-  "description": "Technology club"
+  "message": "Stationery request created successfully",
+  "request": {
+    "id": 7,
+    "clubId": 1,
+    "requestTitle": "Stationery for workshop",
+    "status": "SUBMITTED"
+  }
 }
-```
-**Response:** Club ID = 1
-
-### Step 3: Admin Creates Coordinator for Club
-```bash
-POST /admin/coordinators
-Headers: Authorization: Bearer <admin-token>
-{
-  "fullName": "Ravi Kumar",
-  "email": "ravi@club.in",
-  "password": "CoordPass@123",
-  "clubId": 1
-}
-```
-**Response:** Coordinator user created
-
-### Step 4: Coordinator Logs In
-```bash
-POST /auth/login
-{
-  "email": "ravi@club.in",
-  "password": "CoordPass@123",
-  "roleCode": "COORDINATOR",
-  "clubId": 1
-}
-```
-**Response:** Coordinator access token with activeClubId = 1
-
-### Step 5: Coordinator Creates Student Lead
-```bash
-POST /coordinator/leads
-Headers: Authorization: Bearer <coordinator-token>
-{
-  "fullName": "Anita Sharma",
-  "email": "anita@club.in",
-  "password": "LeadPass@123",
-  "roleCode": "STUDENT_LEAD"
-}
-```
-**Response:** Student lead user created
-
-### Step 6: Student Lead Logs In
-```bash
-POST /auth/login
-{
-  "email": "anita@club.in",
-  "password": "LeadPass@123",
-  "roleCode": "STUDENT_LEAD",
-  "clubId": 1
-}
-```
-**Response:** Student lead access token with activeClubId = 1
-
-### Step 7: Student Lead Creates Members
-```bash
-POST /student-lead/members
-Headers: Authorization: Bearer <student-lead-token>
-{
-  "fullName": "Vikram Singh",
-  "email": "vikram@club.in",
-  "password": "MemberPass@123"
-}
-```
-**Response:** Member user created
-
----
-
-## 🔑 Authorization Header Format
-
-All protected endpoints require:
-```
-Authorization: Bearer <accessToken>
-```
-
-Example:
-```
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIyIiwi...
 ```
 
 ---
 
-## 📌 Important Notes
+## Finance Lead APIs
 
-1. **Token Expiry:** Access tokens expire after 1 day (check JWT_ACCESS_EXPIRES_IN in .env)
-2. **Role-Based Access:** All endpoints check the user's role and club membership
-3. **Club Scoping:** COORDINATOR, STUDENT_LEAD, FINANCE_LEAD, and MEMBER roles are scoped to a specific club
-4. **Email Uniqueness:** Emails must be unique across the system
-5. **Active Club:** Club-scoped roles require activeClubId in the login token payload
-6. **Role Hierarchy:** Only specified roles can perform certain operations (see authorization checks in each endpoint)
+### List Club Expenses
+`GET /finance-lead/expenses`
+
+Response:
+```json
+{
+  "message": "Expenses fetched successfully",
+  "expenses": [
+    {
+      "id": 12,
+      "title": "Printing for workshop",
+      "description": "Printed 100 handouts for the event",
+      "expense_date": "2026-04-01",
+      "amount": "500.00",
+      "currency": "INR",
+      "status": "SUBMITTED",
+      "submitted_at": "2026-04-01T10:00:00.000Z",
+      "approved_at": null,
+      "rejected_at": null,
+      "rejection_reason": null,
+      "submitted_by_name": "Member One",
+      "submitted_by_email": "member.one@club.in",
+      "category_code": "OTHER",
+      "category_name": "Other"
+    }
+  ]
+}
+```
+
+### Approve/Reject Expense
+`PATCH /finance-lead/expenses/:expenseId/decision`
+
+Request body:
+```json
+{
+  "decision": "APPROVED",
+  "comment": "Looks good"
+}
+```
+
+Allowed values for `decision`:
+- `APPROVED`
+- `REJECTED`
+
+Response:
+```json
+{
+  "message": "Expense decision saved successfully",
+  "expenseId": 12,
+  "decision": "APPROVED"
+}
+```
+
+---
+
+## Stationary Admin APIs
+
+### List Stationery Requests
+`GET /stationary-admin/requests`
+
+Response:
+```json
+{
+  "message": "Stationery requests fetched successfully",
+  "requests": [
+    {
+      "id": 7,
+      "request_title": "Stationery for workshop",
+      "request_reason": "Need pens and notebooks for attendees",
+      "required_by_date": "2026-04-05",
+      "status": "SUBMITTED",
+      "approved_at": null,
+      "rejected_at": null,
+      "rejection_reason": null,
+      "invoice_number": null,
+      "invoice_url": null,
+      "final_amount": null,
+      "requested_by_name": "Member One",
+      "requested_by_email": "member.one@club.in"
+    }
+  ]
+}
+```
+
+### Approve/Reject Stationery Request
+`PATCH /stationary-admin/requests/:requestId/decision`
+
+Request body:
+```json
+{
+  "decision": "APPROVED",
+  "comment": "Approved for purchase",
+  "invoiceNumber": "INV-1024",
+  "invoiceUrl": "https://example.com/invoice.pdf",
+  "finalAmount": 580
+}
+```
+
+Allowed values for `decision`:
+- `APPROVED`
+- `REJECTED`
+
+Response:
+```json
+{
+  "message": "Stationery request decision saved successfully",
+  "requestId": 7,
+  "decision": "APPROVED"
+}
+```
+
+---
+
+## End-to-End Flow
+1. Admin logs in.
+2. Admin creates club.
+3. Admin creates coordinator for that club.
+4. Coordinator logs in with club role.
+5. Coordinator creates finance lead and student lead.
+6. Student lead logs in with club role.
+7. Student lead creates members.
+8. Member logs in with club role.
+9. Member creates expense and stationery request.
+10. Finance lead approves or rejects expense.
+11. Stationary admin approves or rejects stationery request.
+
+---
+
+## Important Notes
+- Club-scoped roles require `activeClubId` in the access token payload.
+- All protected routes require `Authorization: Bearer <accessToken>`.
+- Emails are unique across the system.
+- Access token is the only token used in this backend flow.

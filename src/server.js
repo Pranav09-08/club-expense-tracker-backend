@@ -5,6 +5,9 @@ import db from "./config/db.js";
 import authRoutes from "./routes/authRoute.js";
 import adminRoutes from "./routes/admin/adminRoute.js";
 import coordinatorRoutes from "./routes/coordinator/coordinatorRoute.js";
+import financeLeadRoutes from "./routes/financeLead/financeLeadRoute.js";
+import memberRoutes from "./routes/member/memberRoute.js";
+import stationaryAdminRoutes from "./routes/stationaryAdmin/stationaryAdminRoute.js";
 import studentLeadRoutes from "./routes/studentLead/studentLeadRoute.js";
 
 // Load environment variables from .env file
@@ -19,6 +22,9 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/coordinator", coordinatorRoutes);
+app.use("/api/finance-lead", financeLeadRoutes);
+app.use("/api/member", memberRoutes);
+app.use("/api/stationary-admin", stationaryAdminRoutes);
 app.use("/api/student-lead", studentLeadRoutes);
 
 // Health check route
